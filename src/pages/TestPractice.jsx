@@ -9,7 +9,7 @@ export default function TestPractice() {
   const totalQuestions = parseInt(searchParams.get('count') || '5')
   
   const [currentQuestion, setCurrentQuestion] = useState(1)
-  const [inputMode, setInputMode] = useState('')
+  const [inputMode, setInputMode] = useState(() => localStorage.getItem('testInputMode') || '')
   const [question, setQuestion] = useState('數字 6')
   const [answerCaptured, setAnswerCaptured] = useState(false)
   const [isDrawing, setIsDrawing] = useState(false)
@@ -27,6 +27,13 @@ export default function TestPractice() {
     return questions[Math.floor(Math.random() * questions.length)]
   }
 
+  // 保存輸入方式到 localStorage
+  useEffect(() => {
+    if (inputMode) {
+      localStorage.setItem('testInputMode', inputMode)
+    }
+  }, [inputMode])
+
   useEffect(() => {
     setQuestion(getRandomQuestion())
   }, [currentQuestion])
@@ -43,6 +50,11 @@ export default function TestPractice() {
         const imageData = canvas.toDataURL('image/png')
         setAnswer(imageData)
         setAnswerCaptured(true)
+        
+        // 添加鎖定特效：給 canvas 加上紅框
+        canvas.style.border = '4px solid #ef4444'
+        canvas.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.5)'
+        canvas.style.transition = 'all 0.3s ease'
       }
     }
   }
@@ -51,6 +63,14 @@ export default function TestPractice() {
     setClearTrigger(true)
     setAnswer(null)
     setAnswerCaptured(false)
+    
+    // 移除鎖定特效
+    const canvas = document.querySelector('canvas')
+    if (canvas) {
+      canvas.style.border = '2px solid #d1d5db'
+      canvas.style.boxShadow = 'none'
+    }
+    
     setTimeout(() => setClearTrigger(false), 100)
   }
 
@@ -67,7 +87,7 @@ export default function TestPractice() {
       setCurrentQuestion(currentQuestion + 1)
       setAnswer(null)
       setAnswerCaptured(false)
-      setInputMode('')
+      // 不重置 inputMode，保持使用者選擇
       handleClear()
     } else {
       // 測驗結束，計算結果
@@ -152,6 +172,7 @@ export default function TestPractice() {
               <CameraCapture
                 isActive={inputMode === 'camera'}
                 onCapture={handleCameraCapture}
+                capturedImage={answer}
               />
             )}
             {!inputMode && (

@@ -1,20 +1,29 @@
 import { useRef, useEffect, useState } from 'react'
 
-export default function CameraCapture({ isActive, onCapture }) {
+export default function CameraCapture({ isActive, onCapture, capturedImage }) {
   const videoRef = useRef(null)
   const [stream, setStream] = useState(null)
+  const [captured, setCaptured] = useState(false)
 
   useEffect(() => {
-    if (isActive) {
+    if (capturedImage) {
+      setCaptured(true)
+    }
+  }, [capturedImage])
+
+  useEffect(() => {
+    if (isActive && !captured) {
       startCamera()
-    } else {
+    } else if (!isActive) {
       stopCamera()
     }
 
     return () => {
-      stopCamera()
+      if (!captured) {
+        stopCamera()
+      }
     }
-  }, [isActive])
+  }, [isActive, captured])
 
   const startCamera = async () => {
     try {
@@ -35,28 +44,39 @@ export default function CameraCapture({ isActive, onCapture }) {
       stream.getTracks().forEach(track => track.stop())
       setStream(null)
     }
-    if (videoRef.current) {
+    if (videoRef.current && !captured) {
       videoRef.current.srcObject = null
     }
   }
 
   const captureImage = () => {
-    if (videoRef.current) {
+    if (videoRef.current && videoRef.current.srcObject) {
       const canvas = document.createElement('canvas')
       canvas.width = videoRef.current.videoWidth
       canvas.height = videoRef.current.videoHeight
       const ctx = canvas.getContext('2d')
       ctx.drawImage(videoRef.current, 0, 0)
       const imageData = canvas.toDataURL('image/png')
+      
+      // 停止攝影機
+      stopCamera()
+      setCaptured(true)
       onCapture(imageData)
     }
   }
 
-  useEffect(() => {
-    if (isActive) {
-      startCamera()
+  const resetCapture = () => {
+    setCaptured(false)
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
     }
-  }, [isActive])
+    // 重置並重新開始攝影機
+    setTimeout(() => {
+      if (isActive) {
+        startCamera()
+      }
+    }, 100)
+  }
 
   if (!isActive) {
     return (
@@ -68,18 +88,38 @@ export default function CameraCapture({ isActive, onCapture }) {
 
   return (
     <div className="relative">
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        className="w-full h-96 object-cover border-2 border-gray-300 rounded-lg bg-gray-900"
-      />
-      <button
-        onClick={captureImage}
-        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg"
-      >
-        擷取畫面
-      </button>
+      {captured && capturedImage ? (
+        <div className="relative">
+          <img
+            src={capturedImage}
+            alt="擷取的畫面"
+            className="w-full h-96 object-cover border-4 border-red-500 rounded-lg shadow-lg"
+          />
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-3">
+            <button
+              onClick={resetCapture}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition-all"
+            >
+              重新擷取
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="relative">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="w-full h-96 object-cover border-2 border-gray-300 rounded-lg bg-gray-900"
+          />
+          <button
+            onClick={captureImage}
+            className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition-all"
+          >
+            擷取畫面
+          </button>
+        </div>
+      )}
     </div>
   )
 }

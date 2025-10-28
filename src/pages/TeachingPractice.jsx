@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Canvas from '../components/Canvas'
 import CameraCapture from '../components/CameraCapture'
 
 export default function TeachingPractice() {
   const navigate = useNavigate()
-  const [inputMode, setInputMode] = useState('') // 'draw' or 'camera'
+  const [inputMode, setInputMode] = useState(() => localStorage.getItem('teachingInputMode') || '') // 從 localStorage 讀取
   const [question, setQuestion] = useState('數字 6')
   const [answerCaptured, setAnswerCaptured] = useState(false)
   const [isDrawing, setIsDrawing] = useState(false)
@@ -24,6 +24,13 @@ export default function TeachingPractice() {
     return questions[Math.floor(Math.random() * questions.length)]
   }
 
+  // 保存輸入方式到 localStorage
+  useEffect(() => {
+    if (inputMode) {
+      localStorage.setItem('teachingInputMode', inputMode)
+    }
+  }, [inputMode])
+
   const handleLockAnswer = () => {
     if (inputMode === 'draw') {
       // 從 Canvas 獲取圖像數據
@@ -32,6 +39,11 @@ export default function TeachingPractice() {
         const imageData = canvas.toDataURL('image/png')
         setAnswer(imageData)
         setAnswerCaptured(true)
+        
+        // 添加鎖定特效：給 canvas 加上紅框
+        canvas.style.border = '4px solid #ef4444'
+        canvas.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.5)'
+        canvas.style.transition = 'all 0.3s ease'
       }
     } else if (inputMode === 'camera') {
       // Camera 會在按下擷取按鈕時自動處理
@@ -43,6 +55,14 @@ export default function TeachingPractice() {
     setAnswer(null)
     setAnswerCaptured(false)
     setShowResult(false)
+    
+    // 移除鎖定特效
+    const canvas = document.querySelector('canvas')
+    if (canvas) {
+      canvas.style.border = '2px solid #d1d5db'
+      canvas.style.boxShadow = 'none'
+    }
+    
     setTimeout(() => setClearTrigger(false), 100)
   }
 
@@ -75,7 +95,7 @@ export default function TeachingPractice() {
     setAnswer(null)
     setAnswerCaptured(false)
     setShowResult(false)
-    setInputMode('')
+    // 不重置 inputMode，保持使用者選擇
     handleClear()
   }
 
@@ -149,6 +169,7 @@ export default function TeachingPractice() {
               <CameraCapture
                 isActive={inputMode === 'camera'}
                 onCapture={handleCameraCapture}
+                capturedImage={answer}
               />
             )}
             {!inputMode && (
@@ -201,7 +222,7 @@ export default function TeachingPractice() {
               onClick={handleEndPractice}
               className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow-lg transition-all"
             >
-              結束作答
+              結束教學
             </button>
           </div>
         </div>
