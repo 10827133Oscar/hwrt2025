@@ -8,8 +8,8 @@ export default function Canvas({ isDrawing, clear, onCapture }) {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
     
-    // 設定畫布大小
-    canvas.width = 600
+    // 設定畫布大小為正方形
+    canvas.width = 400
     canvas.height = 400
     
     // 設定繪畫樣式
@@ -56,15 +56,17 @@ export default function Canvas({ isDrawing, clear, onCapture }) {
   }
 
   return (
-    <canvas
-      ref={canvasRef}
-      onMouseDown={startDrawing}
-      onMouseMove={draw}
-      onMouseUp={stopDrawing}
-      onMouseLeave={stopDrawing}
-      className="border-2 border-gray-300 rounded-lg bg-white shadow-inner"
-      style={{ touchAction: 'none' }}
-    />
+    <div className="w-96 h-96 flex items-center justify-center mx-auto animate-fade-in">
+      <canvas
+        ref={canvasRef}
+        onMouseDown={startDrawing}
+        onMouseMove={draw}
+        onMouseUp={stopDrawing}
+        onMouseLeave={stopDrawing}
+        className="border-2 border-gray-300 rounded-lg bg-white shadow-inner transition-all duration-300"
+        style={{ touchAction: 'none' }}
+      />
+    </div>
   )
 }
 

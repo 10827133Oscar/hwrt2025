@@ -51,9 +51,9 @@ export default function TestPractice() {
         setAnswer(imageData)
         setAnswerCaptured(true)
         
-        // 添加鎖定特效：給 canvas 加上紅框
+        // 添加鎖定特效：給 canvas 加上紅框和脈衝效果
         canvas.style.border = '4px solid #ef4444'
-        canvas.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.5)'
+        canvas.style.animation = 'pulse-glow 2s ease-in-out infinite'
         canvas.style.transition = 'all 0.3s ease'
       }
     }
@@ -68,7 +68,7 @@ export default function TestPractice() {
     const canvas = document.querySelector('canvas')
     if (canvas) {
       canvas.style.border = '2px solid #d1d5db'
-      canvas.style.boxShadow = 'none'
+      canvas.style.animation = 'none'
     }
     
     setTimeout(() => setClearTrigger(false), 100)
@@ -173,6 +173,7 @@ export default function TestPractice() {
                 isActive={inputMode === 'camera'}
                 onCapture={handleCameraCapture}
                 capturedImage={answer}
+                clearTrigger={clearTrigger}
               />
             )}
             {!inputMode && (

@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 
-export default function CameraCapture({ isActive, onCapture, capturedImage }) {
+export default function CameraCapture({ isActive, onCapture, capturedImage, clearTrigger }) {
   const videoRef = useRef(null)
   const [stream, setStream] = useState(null)
   const [captured, setCaptured] = useState(false)
@@ -8,18 +8,41 @@ export default function CameraCapture({ isActive, onCapture, capturedImage }) {
   useEffect(() => {
     if (capturedImage) {
       setCaptured(true)
+    } else {
+      // 當外部清除時，重置狀態並重啟攝影機
+      setCaptured(false)
+      if (isActive && captured) {
+        setTimeout(() => {
+          startCamera()
+        }, 100)
+      }
     }
   }, [capturedImage])
 
   useEffect(() => {
+    // 外部清除觸發
+    if (clearTrigger) {
+      setCaptured(false)
+      setTimeout(() => {
+        if (isActive) {
+          startCamera()
+        }
+      }, 100)
+    }
+  }, [clearTrigger])
+
+  useEffect(() => {
     if (isActive && !captured) {
       startCamera()
-    } else if (!isActive) {
-      stopCamera()
+    } else if (!isActive || captured) {
+      // 只在不是活動狀態或已擷取時停止
+      if (!captured) {
+        stopCamera()
+      }
     }
 
     return () => {
-      if (!captured) {
+      if (!captured && !isActive) {
         stopCamera()
       }
     }
@@ -80,7 +103,7 @@ export default function CameraCapture({ isActive, onCapture, capturedImage }) {
 
   if (!isActive) {
     return (
-      <div className="w-full h-96 border-2 border-gray-300 rounded-lg bg-gray-100 flex items-center justify-center">
+      <div className="w-96 h-96 border-2 border-gray-300 rounded-lg bg-gray-100 flex items-center justify-center mx-auto">
         <p className="text-gray-500 text-lg">請選擇【鏡頭擷取】來啟動攝影機</p>
       </div>
     )
@@ -89,11 +112,11 @@ export default function CameraCapture({ isActive, onCapture, capturedImage }) {
   return (
     <div className="relative">
       {captured && capturedImage ? (
-        <div className="relative">
+        <div className="relative animate-fade-in">
           <img
             src={capturedImage}
             alt="擷取的畫面"
-            className="w-full h-96 object-cover border-4 border-red-500 rounded-lg shadow-lg"
+            className="w-96 h-96 mx-auto object-cover border-4 border-red-500 rounded-lg shadow-lg animate-scale-in"
           />
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-3">
             <button
@@ -105,12 +128,12 @@ export default function CameraCapture({ isActive, onCapture, capturedImage }) {
           </div>
         </div>
       ) : (
-        <div className="relative">
+        <div className="relative animate-fade-in">
           <video
             ref={videoRef}
             autoPlay
             playsInline
-            className="w-full h-96 object-cover border-2 border-gray-300 rounded-lg bg-gray-900"
+            className="w-96 h-96 mx-auto object-cover border-2 border-gray-300 rounded-lg bg-gray-900"
           />
           <button
             onClick={captureImage}

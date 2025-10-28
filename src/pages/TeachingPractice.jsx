@@ -40,9 +40,9 @@ export default function TeachingPractice() {
         setAnswer(imageData)
         setAnswerCaptured(true)
         
-        // 添加鎖定特效：給 canvas 加上紅框
+        // 添加鎖定特效：給 canvas 加上紅框和脈衝效果
         canvas.style.border = '4px solid #ef4444'
-        canvas.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.5)'
+        canvas.style.animation = 'pulse-glow 2s ease-in-out infinite'
         canvas.style.transition = 'all 0.3s ease'
       }
     } else if (inputMode === 'camera') {
@@ -60,7 +60,7 @@ export default function TeachingPractice() {
     const canvas = document.querySelector('canvas')
     if (canvas) {
       canvas.style.border = '2px solid #d1d5db'
-      canvas.style.boxShadow = 'none'
+      canvas.style.animation = 'none'
     }
     
     setTimeout(() => setClearTrigger(false), 100)
@@ -117,13 +117,13 @@ export default function TeachingPractice() {
           </h1>
 
           {/* 輸入模式選擇 */}
-          <div className="flex justify-center space-x-4 mb-8">
+          <div className="flex justify-center space-x-4 mb-8 animate-fade-in">
             <button
               onClick={() => {
                 setInputMode('draw')
                 setIsDrawing(true)
               }}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+              className={`px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${
                 inputMode === 'draw'
                   ? 'bg-blue-500 text-white shadow-lg'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -138,7 +138,7 @@ export default function TeachingPractice() {
             </button>
             <button
               onClick={() => setInputMode('camera')}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+              className={`px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${
                 inputMode === 'camera'
                   ? 'bg-blue-500 text-white shadow-lg'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -170,6 +170,7 @@ export default function TeachingPractice() {
                 isActive={inputMode === 'camera'}
                 onCapture={handleCameraCapture}
                 capturedImage={answer}
+                clearTrigger={clearTrigger}
               />
             )}
             {!inputMode && (
@@ -181,46 +182,46 @@ export default function TeachingPractice() {
 
           {/* 結果顯示 */}
           {showResult && (
-            <div className={`text-center mb-6 p-4 rounded-xl ${
-              isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+            <div className={`text-center mb-6 p-6 rounded-xl animate-scale-in ${
+              isCorrect ? 'bg-green-100 text-green-700 border-4 border-green-500' : 'bg-red-100 text-red-700 border-4 border-red-500'
             }`}>
-              <p className="text-2xl font-bold">
+              <p className="text-3xl font-bold animate-fade-in">
                 {isCorrect ? '答題正確 ✓' : '答題錯誤 ✗'}
               </p>
             </div>
           )}
 
           {/* 控制按鈕 */}
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-4 animate-fade-in">
             <button
               onClick={handleLockAnswer}
               disabled={!inputMode || answerCaptured}
-              className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-all"
+              className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95"
             >
               鎖定答案
             </button>
             <button
               onClick={handleClear}
-              className="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-xl shadow-lg transition-all"
+              className="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-xl shadow-lg transition-all transform hover:scale-105 active:scale-95"
             >
               清空答案
             </button>
             <button
               onClick={handleSubmit}
               disabled={!answerCaptured || showResult}
-              className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-all"
+              className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95"
             >
               確定送出
             </button>
             <button
               onClick={handleNextQuestion}
-              className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl shadow-lg transition-all"
+              className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl shadow-lg transition-all transform hover:scale-105 active:scale-95"
             >
               下一題
             </button>
             <button
               onClick={handleEndPractice}
-              className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow-lg transition-all"
+              className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow-lg transition-all transform hover:scale-105 active:scale-95"
             >
               結束教學
             </button>
